@@ -39,7 +39,12 @@
 #include "WeatherFax.h"
 
 InternetRetrievalDialog::InternetRetrievalDialog( weatherfax_pi &_weatherfax_pi, wxWindow* parent)
-    : InternetRetrievalDialogBase( parent ), m_weatherfax_pi(_weatherfax_pi),
+#ifndef __WXOSX__
+    : InternetRetrievalDialogBase( parent ),
+#else
+    : InternetRetrievalDialogBase( parent, wxID_ANY, _("Internet Retrieval"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|wxSTAY_ON_TOP ),
+#endif
+      m_weatherfax_pi(_weatherfax_pi),
       m_bLoaded(false), m_bDisableServers(false), m_bDisableRegions(false),
       m_bDisableFilter(true), m_bRebuilding(false)
 {
@@ -759,6 +764,12 @@ void InternetRetrievalDialog::RebuildList()
     m_bRetrieveScheduled->Enable(enable);
     m_bRetrieveSelected->Enable(m_lUrls->GetSelectedItemCount() != 0);
 
+    m_lUrls->SetColumnWidth(SCHEDULED, wxLIST_AUTOSIZE);
+    m_lUrls->SetColumnWidth(SERVER, wxLIST_AUTOSIZE);
+    m_lUrls->SetColumnWidth(REGION, wxLIST_AUTOSIZE);
+    m_lUrls->SetColumnWidth(CONTENTS, wxLIST_AUTOSIZE);
+    m_lUrls->SetColumnWidth(MAP_AREA, wxLIST_AUTOSIZE);
+
     m_bRebuilding = false;
 }
 
@@ -768,17 +779,8 @@ void InternetRetrievalDialog::UpdateItem(long index)
         (wxUIntToPtr(m_lUrls->GetItemData(index)));
 
     m_lUrls->SetItemImage(index, url->Scheduled ? 1 : 0);
-    m_lUrls->SetColumnWidth(SCHEDULED, 50);
-
     m_lUrls->SetItem(index, SERVER, url->Server);
-    m_lUrls->SetColumnWidth(SERVER, 120 /*wxLIST_AUTOSIZE*/);
-
     m_lUrls->SetItem(index, REGION, url->Region);
-    m_lUrls->SetColumnWidth(REGION, 120 /*wxLIST_AUTOSIZE*/);
-
     m_lUrls->SetItem(index, CONTENTS, url->Contents);
-    m_lUrls->SetColumnWidth(CONTENTS, 350 /*wxLIST_AUTOSIZE*/);
-
     m_lUrls->SetItem(index, MAP_AREA, url->Area.AreaDescription());
-    m_lUrls->SetColumnWidth(MAP_AREA, 150);
 }
